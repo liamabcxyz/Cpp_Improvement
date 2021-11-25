@@ -1,0 +1,58 @@
+class Solution {
+    unordered_map<string,queue<int>> mp;
+public:
+    int findIndex(vector<int>& task)
+    {
+        string str = to_string(task[0])+","+to_string(task[1]);
+        int res = mp[str].front();
+        if( mp[str].size()>=2)
+            mp[str].pop();       
+        return res;
+    }
+    vector<int> getOrder(vector<vector<int>>& tasks) {
+        for(int i=0;i<tasks.size();i++)
+        {
+            mp[to_string(tasks[i][0])+","+to_string(tasks[i][1])].push(i);
+        }
+        
+        sort(tasks.begin(),tasks.end(),[](vector<int>& v1,vector<int>&v2){
+            if(v1[0]==v2[0])
+                return v1[1]<=v2[1];
+            return v1[0]<v2[0];
+        });
+        
+        priority_queue<pair<int,int>,vector<pair<int,int>>, greater<pair<int,int>>> pq;  // processing time and index
+        vector<int> res;
+        pq.push({tasks[0][1],findIndex(tasks[0])});
+
+            
+        long long time = tasks[0][0];
+        int index = 1;
+        
+        while(!pq.empty() || index<tasks.size())
+        {
+            if(pq.empty())
+            {
+                pq.push({tasks[index][1],findIndex(tasks[index])});
+                time = tasks[index][0];
+                index++;
+            }
+            auto top = pq.top();
+            pq.pop();
+            res.push_back(top.second);
+            time+=top.first;
+            for(int i=index;i<tasks.size();i++)
+            {
+                if(tasks[i][0]<=time)
+                {
+                    pq.push({tasks[i][1],findIndex(tasks[i])});                
+                    index++;
+                }
+                else
+                    break;
+            }
+        }
+        
+        return res;
+    }
+};
